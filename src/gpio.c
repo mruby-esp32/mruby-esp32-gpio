@@ -3,6 +3,9 @@
 
 #include "driver/gpio.h"
 
+#define GPIO_MODE_DEF_PULLUP (BIT3)
+#define GPIO_MODE_INPUT_PULLUP ((GPIO_MODE_INPUT)|(GPIO_MODE_DEF_PULLUP))
+
 static mrb_value
 mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
   mrb_value pin, dir;
@@ -13,7 +16,12 @@ mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
     return mrb_nil_value();
   }
 
-  gpio_set_direction(mrb_fixnum(pin), mrb_fixnum(dir));
+  gpio_pad_select_gpio(mrb_fixnum(pin));
+  gpio_set_direction(mrb_fixnum(pin), mrb_fixnum(dir) & ~GPIO_MODE_DEF_PULLUP);
+
+  if (mrb_fixnum(dir) & GPIO_MODE_DEF_PULLUP) {
+    gpio_set_pull_mode(mrb_fixnum(pin), GPIO_PULLUP_ONLY);
+  }
 
   return self;
 }
@@ -108,6 +116,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
 
   mrb_define_const(mrb, constants, "INPUT", mrb_fixnum_value(GPIO_MODE_INPUT));
+  mrb_define_const(mrb, constants, "INPUT_PULLUP", mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
   mrb_define_const(mrb, constants, "OUTPUT", mrb_fixnum_value(GPIO_MODE_OUTPUT));
 }
 
