@@ -1,27 +1,14 @@
-def sleep secs
-  ESP32::System.delay(secs * 1000)
-end
-$isrs={}
-def isr pin, &b
-  $isrs[pin] = b if b
-  
-  ESP32::GPIO.add_isr_handler(pin) if b
-  
-  return if b
-  
-  $isrs[pin].call(pin) unless b
-end
+ESP32::GPIO.debug_level=1
 
-def call(pin)
-  isr pin
-end
+pin = ESP32::GPIO::Pin.new(18, :pullup)
 
-puts "INIT:"
+pin.on_interrupt do |gpio_num|
+  puts "INTR: on pin: #{gpio_num}."
+end 
 
-isr 18, &(B=Proc.new do |pin|
-  print " #{pin} "
-end)
+puts "Running!"
 
-while true;end
+while true;
+end    
 
 
