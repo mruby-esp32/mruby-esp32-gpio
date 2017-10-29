@@ -149,8 +149,6 @@ mrb_esp32_gpio_init_isr(mrb_state* mrb, mrb_value self) {
     mrb_int task_size;
     mrb_get_args(mrb,"i", &task_size);
     
-    
-    
     gpio_install_isr_service(0);
 
     if (mrb_esp32_gpio_env.debug == 1) {
@@ -209,8 +207,6 @@ mrb_esp32_gpio_get_isr_init(mrb_state* mrb, mrb_value self) {
 	
 	return mrb_nil_value();
 }
-
-
 
 void
 mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
