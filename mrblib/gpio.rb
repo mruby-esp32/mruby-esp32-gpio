@@ -94,7 +94,7 @@ module ESP32
       end
     
       def read
-        GPIO.read pin
+        GPIO.digital_read pin
       end 
      
       def analog_write val
@@ -102,7 +102,7 @@ module ESP32
       end
     
       def write val
-        GPIO.write pin, val
+        GPIO.digital_write pin, val
       end 
     
       def mode= mode
