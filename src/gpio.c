@@ -23,6 +23,7 @@ typedef struct {
   mrb_state* mrb;
   int debug;
   int isr_init;
+  TaskHandle_t mrb_task;
 } mrb_esp32_gpio_env_t;
 
 mrb_esp32_gpio_env_t mrb_esp32_gpio_env;
@@ -130,10 +131,14 @@ static void mrb_esp32_gpio_isr_task(void* data)
 			   printf("GPIO[%d] intr, val: %d\n", io_num, gpio_get_level(io_num));
            }
            
+           vTaskSuspend(mrb_esp32_gpio_env.mrb_task);
+           
            int ai = mrb_gc_arena_save(mrb_esp32_gpio_env.mrb);
            mrb_value esp32 = mrb_const_get(mrb_esp32_gpio_env.mrb,mrb_obj_value(mrb_esp32_gpio_env.mrb->object_class), mrb_intern_cstr(mrb_esp32_gpio_env.mrb, "ESP32"));
            mrb_funcall(mrb_esp32_gpio_env.mrb, mrb_const_get(mrb_esp32_gpio_env.mrb, esp32, mrb_intern_cstr(mrb_esp32_gpio_env.mrb, "GPIO")), "dispatch_isr", 1, mrb_fixnum_value(io_num));  
            mrb_gc_arena_restore(mrb_esp32_gpio_env.mrb, ai);
+           
+           xTaskResumeFromISR(mrb_esp32_gpio_env.mrb_task);
         }
     }
 }
@@ -157,7 +162,7 @@ mrb_esp32_gpio_init_isr(mrb_state* mrb, mrb_value self) {
         
     mrb_esp32_gpio_isr_evt_queue = xQueueCreate(10, sizeof(uint32_t));
 
-    xTaskCreate(mrb_esp32_gpio_isr_task, "mrb_esp32_gpio_isr_task", (uint32_t)task_size, NULL, 10, NULL);
+    xTaskCreate(mrb_esp32_gpio_isr_task, "mrb_esp32_gpio_isr_task", (uint32_t)task_size, NULL, 5, NULL);
 	
 	mrb_esp32_gpio_env.isr_init = 1;
 	
@@ -214,7 +219,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_esp32_gpio_env_t env = mrb_esp32_gpio_env;
   env.isr_init  = 0;
   env.debug     = 1;
-  	
+  env.mrb_task  = xTaskGetCurrentTaskHandle();
   struct RClass *esp32, *gpio, *constants;
 
   esp32 = mrb_define_module(mrb, "ESP32");
