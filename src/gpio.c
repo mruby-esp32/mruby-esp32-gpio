@@ -6,7 +6,13 @@
 #include "driver/adc.h"
 
 #define GPIO_MODE_DEF_PULLUP (BIT3)
+#define GPIO_MODE_DEF_PULLDOWN (BIT3)
 #define GPIO_MODE_INPUT_PULLUP ((GPIO_MODE_INPUT)|(GPIO_MODE_DEF_PULLUP))
+#define GPIO_MODE_INPUT_PULLDOWN ((GPIO_MODE_INPUT)|(GPIO_MODE_DEF_PULLDOWN))
+#define GPIO_MODE_OUTPUT (GPIO_MODE_DEF_OUTPUT) 
+#define GPIO_MODE_OUTPUT_OD ((GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
+#define GPIO_MODE_INPUT_OUTPUT_OD ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
+#define GPIO_MODE_INPUT_OUTPUT ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT))
 
 static mrb_value
 mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
@@ -173,9 +179,12 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
 
-  mrb_define_const(mrb, constants, "INPUT", mrb_fixnum_value(GPIO_MODE_INPUT));
-  mrb_define_const(mrb, constants, "INPUT_PULLUP", mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
-  mrb_define_const(mrb, constants, "OUTPUT", mrb_fixnum_value(GPIO_MODE_OUTPUT));
+  mrb_define_const(mrb, constants, "INPUT",          mrb_fixnum_value(GPIO_MODE_INPUT));
+  mrb_define_const(mrb, constants, "INPUT_OUTPUT",   mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT));
+  mrb_define_const(mrb, constants, "OUTPUT",         mrb_fixnum_value(GPIO_MODE_OUTPUT));
+  mrb_define_const(mrb, constants, "INPUT_PULLUP",   mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
+  mrb_define_const(mrb, constants, "INPUT_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
+    
 }
 
 void
