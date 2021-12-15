@@ -91,7 +91,7 @@ mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
 
   adc1_config_channel_atten(mrb_fixnum(ch), ADC_ATTEN_11db);
 
-  return mrb_fixnum_value(adc1_get_voltage(mrb_fixnum(ch)));
+  return mrb_fixnum_value(adc1_get_raw(mrb_fixnum(ch)));
 }
 
 static mrb_value
