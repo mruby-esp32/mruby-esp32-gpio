@@ -5,10 +5,7 @@ module ESP32
     class << self
       alias :digital_write :digitalWrite   
       alias :digital_read  :digitalRead
-      alias :analog_write  :analogWrite   
-      alias :analog_read   :analogRead    
       alias :pin_mode      :pinMode 
-      alias :hall_read     :hallRead   
     end  
   
     class Pin
@@ -27,18 +24,10 @@ module ESP32
         self.mode= mode
       end
   
-      def analog_read
-        GPIO.analog_read pin
-      end
-    
       def read
         GPIO.digital_read pin
       end 
      
-      def analog_write val
-        GPIO.analog_write pin, val
-      end
-    
       def write val
         GPIO.digital_write pin, val
         val

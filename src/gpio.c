@@ -2,8 +2,6 @@
 #include <mruby/value.h>
 
 #include "driver/gpio.h"
-#include "driver/dac.h"
-#include "driver/adc.h"
 
 #define GPIO_MODE_DEF_PULLUP (BIT3)
 #define GPIO_MODE_DEF_PULLDOWN (BIT3)
@@ -24,7 +22,7 @@ mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
     return mrb_nil_value();
   }
 
-  gpio_pad_select_gpio(mrb_fixnum(pin));
+  gpio_reset_pin(mrb_fixnum(pin));
   gpio_set_direction(mrb_fixnum(pin), mrb_fixnum(dir) & ~GPIO_MODE_DEF_PULLUP);
 
   if (mrb_fixnum(dir) & GPIO_MODE_DEF_PULLUP) {
@@ -50,23 +48,6 @@ mrb_esp32_gpio_digital_write(mrb_state *mrb, mrb_value self) {
 }
 
 static mrb_value
-mrb_esp32_gpio_analog_write(mrb_state *mrb, mrb_value self) {
-  mrb_value ch, vol;
-
-  mrb_get_args(mrb, "oo", &ch, &vol);
-
-  if (!mrb_fixnum_p(ch) || !mrb_fixnum_p(vol)) {
-    return mrb_nil_value();
-  }
-
-  dac_output_enable(mrb_fixnum(ch));
-
-  dac_output_voltage(mrb_fixnum(ch), mrb_fixnum(vol));
-
-  return self;
-}
-
-static mrb_value
 mrb_esp32_gpio_digital_read(mrb_state *mrb, mrb_value self) {
   mrb_value pin;
 
@@ -77,26 +58,6 @@ mrb_esp32_gpio_digital_read(mrb_state *mrb, mrb_value self) {
   }
 
   return mrb_fixnum_value(gpio_get_level(mrb_fixnum(pin)));
-}
-
-static mrb_value
-mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
-  mrb_value ch;
-
-  mrb_get_args(mrb, "o", &ch);
-
-  if (!mrb_fixnum_p(ch)) {
-    return mrb_nil_value();
-  }
-
-  adc1_config_channel_atten(mrb_fixnum(ch), ADC_ATTEN_11db);
-
-  return mrb_fixnum_value(adc1_get_raw(mrb_fixnum(ch)));
-}
-
-static mrb_value
-mrb_esp32_gpio_hall_read(mrb_state *mrb, mrb_value self) {
-  return mrb_fixnum_value(hall_sensor_read());
 }
 
 void
@@ -110,11 +71,6 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, gpio, "pinMode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalWrite", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
-  mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
-  mrb_define_module_function(mrb, gpio, "analogRead", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
-  mrb_define_module_function(mrb, gpio, "hallRead", mrb_esp32_gpio_hall_read, MRB_ARGS_NONE());
-
-  adc1_config_width(ADC_WIDTH_12Bit);
 
   constants = mrb_define_module_under(mrb, gpio, "Constants");
 
@@ -161,20 +117,6 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   define_const(GPIO_NUM_38);
   define_const(GPIO_NUM_39);
   define_const(GPIO_NUM_MAX);
-
-  define_const(DAC_CHANNEL_1);
-  define_const(DAC_CHANNEL_2);
-  define_const(DAC_CHANNEL_MAX);
-
-  define_const(ADC1_CHANNEL_0);
-  define_const(ADC1_CHANNEL_1);
-  define_const(ADC1_CHANNEL_2);
-  define_const(ADC1_CHANNEL_3);
-  define_const(ADC1_CHANNEL_4);
-  define_const(ADC1_CHANNEL_5);
-  define_const(ADC1_CHANNEL_6);
-  define_const(ADC1_CHANNEL_7);
-  define_const(ADC1_CHANNEL_MAX);
 
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
