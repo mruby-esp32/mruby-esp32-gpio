@@ -8,7 +8,6 @@ module ESP32
       alias :analog_write  :analogWrite   
       alias :analog_read   :analogRead    
       alias :pin_mode      :pinMode 
-      alias :hall_read     :hallRead   
     end  
   
     class Pin

@@ -4,11 +4,20 @@ mruby-esp32-gpio
 GPIO library for mruby-esp32.
 
 ## Installation
-Add the line below to your `build_config.rb`:
+In `esp32_build_config.rb`, at the end of the `MRuby::CrossBuild` block, add the following:
 
 ```ruby
   conf.gem :github => 'mruby-esp32/mruby-esp32-gpio'
 ```
+
+In `CMakeLists.txt`, make sure the line `PRIV_REQUIRES` includes the `driver` component. Add it if needed:
+
+```
+  add_prebuilt_library(
+    libmruby ${LIBMRUBY_FILE}
+    PRIV_REQUIRES esp_wifi esp_hw_support esp_rom mqtt driver 
+  )
+````
 
 ## Example
 ```ruby
