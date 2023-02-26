@@ -156,8 +156,8 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   define_const(GPIO_NUM_39);
   define_const(GPIO_NUM_MAX);
 
-  define_const(DAC_CHAN_0);
-  define_const(DAC_CHAN_1);
+  define_const(DAC_CHANNEL_1);
+  define_const(DAC_CHANNEL_2);
 
   define_const(ADC1_CHANNEL_0);
   define_const(ADC1_CHANNEL_1);
