@@ -112,7 +112,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   // Arduino-style camel case methods.
   mrb_define_module_function(mrb, gpio, "pinMode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalWrite", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
-  mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "analogRead", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
   
