@@ -110,7 +110,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   
   adc1_config_width(ADC_BITWIDTH_12);
 
-  constants = mrb_define_module_under(mrb, gpio, "Constants");
+  constants = mrb_define_module_under(mrb, esp32, "Constants");
 
 #define define_const(SYM) \
   do { \
@@ -172,11 +172,11 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
 
-  mrb_define_const(mrb, constants, "INPUT",          mrb_fixnum_value(GPIO_MODE_INPUT));
-  mrb_define_const(mrb, constants, "INPUT_OUTPUT",   mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT));
-  mrb_define_const(mrb, constants, "OUTPUT",         mrb_fixnum_value(GPIO_MODE_OUTPUT));
-  mrb_define_const(mrb, constants, "INPUT_PULLUP",   mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
-  mrb_define_const(mrb, constants, "INPUT_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT",          mrb_fixnum_value(GPIO_MODE_INPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_OUTPUT",   mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_OUTPUT",         mrb_fixnum_value(GPIO_MODE_OUTPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLUP",   mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
     
 }
 
