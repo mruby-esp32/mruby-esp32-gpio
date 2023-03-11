@@ -2,8 +2,8 @@
 #include <mruby/value.h>
 
 #include "driver/gpio.h"
-#include "driver/dac.h"
-#include "driver/adc.h"
+#include "driver/dac_oneshot.h"
+#include "esp_adc/adc_oneshot.h"
 
 #define GPIO_MODE_DEF_PULLUP (BIT3)
 #define GPIO_MODE_DEF_PULLDOWN (BIT3)
@@ -58,11 +58,19 @@ mrb_esp32_gpio_analog_write(mrb_state *mrb, mrb_value self) {
   if (!mrb_fixnum_p(ch) || !mrb_fixnum_p(vol)) {
     return mrb_nil_value();
   }
-
-  dac_output_enable(mrb_fixnum(ch));
-
-  dac_output_voltage(mrb_fixnum(ch), mrb_fixnum(vol));
-
+  
+  // Handle
+  dac_oneshot_handle_t chan_handle;
+  
+  // Configuration
+  dac_oneshot_config_t chan_cfg = {
+      .chan_id = mrb_fixnum(ch),
+  };
+  ESP_ERROR_CHECK(dac_oneshot_new_channel(&chan_cfg, &chan_handle));
+  
+  // Write
+  ESP_ERROR_CHECK(dac_oneshot_output_voltage(chan_handle, mrb_fixnum(vol)));
+  
   return self;
 }
 
@@ -88,10 +96,28 @@ mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
   if (!mrb_fixnum_p(ch)) {
     return mrb_nil_value();
   }
+  
+  // Handle
+  adc_oneshot_unit_handle_t adc1_handle;
+  adc_oneshot_unit_init_cfg_t init_config1 = {
+      .unit_id = ADC_UNIT_1,
+      .ulp_mode = ADC_ULP_MODE_DISABLE,
+  };
+  ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+  
+  // Configuration. ADC_BITWIDTH_DEFAULT = 12
+  adc_oneshot_chan_cfg_t config = {
+      .bitwidth = ADC_BITWIDTH_DEFAULT,
+      .atten = ADC_ATTEN_DB_11,
+  };
+  ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, mrb_fixnum(ch), &config));
+  
+  // Read and Delete
+  int adc_result;
+  ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, mrb_fixnum(ch), &adc_result));
+  ESP_ERROR_CHECK(adc_oneshot_del_unit(adc1_handle));
 
-  adc1_config_channel_atten(mrb_fixnum(ch), ADC_ATTEN_DB_11);
-
-  return mrb_fixnum_value(adc1_get_raw(mrb_fixnum(ch)));
+  return mrb_fixnum_value(adc_result);
 }
 
 void
@@ -107,8 +133,6 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "analogRead", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
-  
-  adc1_config_width(ADC_BITWIDTH_12);
 
   constants = mrb_define_module_under(mrb, gpio, "Constants");
 
@@ -156,18 +180,23 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   define_const(GPIO_NUM_39);
   define_const(GPIO_NUM_MAX);
 
+  define_const(DAC_CHAN_0);
+  define_const(DAC_CHAN_1);
+  // Old versions of above. Deprecated.
   define_const(DAC_CHANNEL_1);
   define_const(DAC_CHANNEL_2);
 
-  define_const(ADC1_CHANNEL_0);
-  define_const(ADC1_CHANNEL_1);
-  define_const(ADC1_CHANNEL_2);
-  define_const(ADC1_CHANNEL_3);
-  define_const(ADC1_CHANNEL_4);
-  define_const(ADC1_CHANNEL_5);
-  define_const(ADC1_CHANNEL_6);
-  define_const(ADC1_CHANNEL_7);
-  define_const(ADC1_CHANNEL_MAX);
+  define_const(ADC_CHANNEL_0);
+  define_const(ADC_CHANNEL_1);
+  define_const(ADC_CHANNEL_2);
+  define_const(ADC_CHANNEL_3);
+  define_const(ADC_CHANNEL_4);
+  define_const(ADC_CHANNEL_5);
+  define_const(ADC_CHANNEL_6);
+  define_const(ADC_CHANNEL_7);
+  // Channel 8 and 9 only exist on ADC2.
+  define_const(ADC_CHANNEL_8);
+  define_const(ADC_CHANNEL_9);
 
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
