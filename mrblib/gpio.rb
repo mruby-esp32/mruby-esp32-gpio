@@ -2,6 +2,12 @@ module ESP32
   include Constants
   
   module GPIO
+    INPUT_PULLUP   = ESP32::GPIO_MODE_INPUT_PULLUP
+    INPUT_PULLDOWN = ESP32::GPIO_MODE_INPUT_PULLDOWN
+    INPUT          = ESP32::GPIO_MODE_INPUT
+    OUTPUT         = ESP32::GPIO_MODE_OUTPUT
+    INPUT_OUTPUT   = ESP32::GPIO_MODE_INPUT_OUTPUT
+    
     class << self
       alias :digital_write :digitalWrite   
       alias :digital_read  :digitalRead
