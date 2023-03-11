@@ -3,11 +3,11 @@ module ESP32
     include Constants
     
     class << self
-      alias :digital_write :digitalWrite   
-      alias :digital_read  :digitalRead
-      alias :analog_write  :analogWrite   
-      alias :analog_read   :analogRead    
-      alias :pin_mode      :pinMode 
+      alias :pinMode      :pin_mode      
+      alias :digitalWrite :digital_write 
+      alias :digitalRead  :digital_read  
+      alias :analogWrite  :analog_write  
+      alias :analogRead   :analog_read   
     end  
   
     class Pin
