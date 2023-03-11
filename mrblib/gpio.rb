@@ -2,14 +2,6 @@ module ESP32
   module GPIO
     include Constants
     
-    class << self
-      alias :pinMode      :pin_mode      
-      alias :digitalWrite :digital_write 
-      alias :digitalRead  :digital_read  
-      alias :analogWrite  :analog_write  
-      alias :analogRead   :analog_read   
-    end  
-  
     class Pin
       PIN_MODE = {
         pullup:   ESP32::GPIO::INPUT_PULLUP,
