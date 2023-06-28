@@ -14,6 +14,7 @@
 #define GPIO_MODE_INPUT_OUTPUT_OD ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
 #define GPIO_MODE_INPUT_OUTPUT ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT))
 
+// Pin Mode
 static mrb_value
 mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
   mrb_value pin, dir;
@@ -34,6 +35,21 @@ mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
   return self;
 }
 
+// Digital Read
+static mrb_value
+mrb_esp32_gpio_digital_read(mrb_state *mrb, mrb_value self) {
+  mrb_value pin;
+
+  mrb_get_args(mrb, "o", &pin);
+
+  if (!mrb_fixnum_p(pin)) {
+    return mrb_nil_value();
+  }
+
+  return mrb_fixnum_value(gpio_get_level(mrb_fixnum(pin)));
+}
+
+// Digital Write
 static mrb_value
 mrb_esp32_gpio_digital_write(mrb_state *mrb, mrb_value self) {
   mrb_value pin, level;
@@ -49,44 +65,7 @@ mrb_esp32_gpio_digital_write(mrb_state *mrb, mrb_value self) {
   return self;
 }
 
-static mrb_value
-mrb_esp32_gpio_analog_write(mrb_state *mrb, mrb_value self) {
-  mrb_value ch, vol;
-
-  mrb_get_args(mrb, "oo", &ch, &vol);
-
-  if (!mrb_fixnum_p(ch) || !mrb_fixnum_p(vol)) {
-    return mrb_nil_value();
-  }
-  
-  // Handle
-  dac_oneshot_handle_t chan_handle;
-  
-  // Configuration
-  dac_oneshot_config_t chan_cfg = {
-      .chan_id = mrb_fixnum(ch),
-  };
-  ESP_ERROR_CHECK(dac_oneshot_new_channel(&chan_cfg, &chan_handle));
-  
-  // Write
-  ESP_ERROR_CHECK(dac_oneshot_output_voltage(chan_handle, mrb_fixnum(vol)));
-  
-  return self;
-}
-
-static mrb_value
-mrb_esp32_gpio_digital_read(mrb_state *mrb, mrb_value self) {
-  mrb_value pin;
-
-  mrb_get_args(mrb, "o", &pin);
-
-  if (!mrb_fixnum_p(pin)) {
-    return mrb_nil_value();
-  }
-
-  return mrb_fixnum_value(gpio_get_level(mrb_fixnum(pin)));
-}
-
+// Analog Read
 static mrb_value
 mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
   mrb_value ch;
@@ -120,31 +99,70 @@ mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
   return mrb_fixnum_value(adc_result);
 }
 
+// Analog Write (DACs not available on some chips)
+#ifdef SOC_DAC_SUPPORTED
+static mrb_value
+mrb_esp32_gpio_analog_write(mrb_state *mrb, mrb_value self) {
+  mrb_value ch, vol;
+
+  mrb_get_args(mrb, "oo", &ch, &vol);
+
+  if (!mrb_fixnum_p(ch) || !mrb_fixnum_p(vol)) {
+    return mrb_nil_value();
+  }
+  
+  // Handle
+  dac_oneshot_handle_t chan_handle;
+  
+  // Configuration
+  dac_oneshot_config_t chan_cfg = {
+      .chan_id = mrb_fixnum(ch),
+  };
+  ESP_ERROR_CHECK(dac_oneshot_new_channel(&chan_cfg, &chan_handle));
+  
+  // Write
+  ESP_ERROR_CHECK(dac_oneshot_output_voltage(chan_handle, mrb_fixnum(vol)));
+  
+  return self;
+}
+#endif
+
 void
-mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
-{
+mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
   struct RClass *esp32, *gpio, *constants;
 
+  // ESP32 module
   esp32 = mrb_define_module(mrb, "ESP32");
 
+  // ESP32::GPIO
   gpio = mrb_define_module_under(mrb, esp32, "GPIO");
-  // Ruby-style snake case methods.
+
+  // Ruby-style snake-case methods.
   mrb_define_module_function(mrb, gpio, "pin_mode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digital_write", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digital_read", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
-  mrb_define_module_function(mrb, gpio, "analog_write", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "analog_read", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
 
-  // Arduino-style camel case methods.
+  // Arduino-style camel-case methods.
   mrb_define_module_function(mrb, gpio, "pinMode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalWrite", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
-  mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "analogRead", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
-
+  
+  // DAC available only on some chips.
+  #ifdef SOC_DAC_SUPPORTED
+    mrb_define_const(mrb, esp32, "SOC_DAC_SUPPORTED", mrb_true_value());
+    mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
+    mrb_define_module_function(mrb, gpio, "analog_write", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
+  #else
+    mrb_define_const(mrb, esp32, "SOC_DAC_SUPPORTED", mrb_false_value());
+  #endif
+  
+  // ESP32::Constants
   constants = mrb_define_module_under(mrb, esp32, "Constants");
 
-#define define_const(SYM) \
+  // Pass a C constant through to mruby, defined inside ESP32::Constants.
+  #define define_const(SYM) \
   do { \
     mrb_define_const(mrb, constants, #SYM, mrb_fixnum_value(SYM)); \
   } while (0)
@@ -188,12 +206,6 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   define_const(GPIO_NUM_39);
   define_const(GPIO_NUM_MAX);
 
-  define_const(DAC_CHAN_0);
-  define_const(DAC_CHAN_1);
-  // Old versions of above. Deprecated.
-  define_const(DAC_CHANNEL_1);
-  define_const(DAC_CHANNEL_2);
-
   define_const(ADC_CHANNEL_0);
   define_const(ADC_CHANNEL_1);
   define_const(ADC_CHANNEL_2);
@@ -206,6 +218,15 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   define_const(ADC_CHANNEL_8);
   define_const(ADC_CHANNEL_9);
 
+  // DAC available only on some chips.
+  #ifdef SOC_DAC_SUPPORTED
+    define_const(DAC_CHAN_0);
+    define_const(DAC_CHAN_1);
+    // Old versions of above. Deprecated.
+    define_const(DAC_CHANNEL_1);
+    define_const(DAC_CHANNEL_2);
+  #endif
+
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
 
@@ -214,7 +235,6 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   mrb_define_const(mrb, constants, "GPIO_MODE_OUTPUT",         mrb_fixnum_value(GPIO_MODE_OUTPUT));
   mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLUP",   mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
   mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
-    
 }
 
 void
