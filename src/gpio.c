@@ -167,6 +167,12 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
     mrb_define_const(mrb, constants, #SYM, mrb_fixnum_value(SYM)); \
   } while (0)
 
+  //
+  // GPIO numbers available on each variant found here:
+  // https://github.com/espressif/esp-idf/blob/67552c31da/components/hal/include/hal/gpio_types.h
+  //
+  // All chips define GPIO_NUM_MAX and GPIO_NUM_0..GPIO_NUM_20.  
+  define_const(GPIO_NUM_MAX);
   define_const(GPIO_NUM_0);
   define_const(GPIO_NUM_1);
   define_const(GPIO_NUM_2);
@@ -187,24 +193,74 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
   define_const(GPIO_NUM_17);
   define_const(GPIO_NUM_18);
   define_const(GPIO_NUM_19);
+  define_const(GPIO_NUM_20);
 
-  define_const(GPIO_NUM_21);
-  define_const(GPIO_NUM_22);
-  define_const(GPIO_NUM_23);
+  // Original, S2, S3, C3, C6 and H2 (all except C2) have 21.
+  #if defined(CONFIG_IDF_TARGET_ESP32)  || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3)|| defined(CONFIG_IDF_TARGET_ESP32C3) || \
+      defined(CONFIG_IDF_TARGET_ESP32C6)|| defined(CONFIG_IDF_TARGET_ESP32H2)      
+    define_const(GPIO_NUM_21);
+  #endif
+  
+  // Original, C6 and H2 have 22,23,25.
+  #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+      defined(CONFIG_IDF_TARGET_ESP32H2)
+    define_const(GPIO_NUM_22);
+    define_const(GPIO_NUM_23);
+    define_const(GPIO_NUM_25);
+  #endif
+    
+  // C6 and H2 have 24.
+  #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    define_const(GPIO_NUM_24);
+  #endif
+    
+  // Original, S2, S3, C6 ad H2 have 26,27.
+  #if defined(CONFIG_IDF_TARGET_ESP32)   || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
+      defined(CONFIG_IDF_TARGET_ESP32H2)
+    define_const(GPIO_NUM_26);
+    define_const(GPIO_NUM_27);
+  #endif
+    
+  // Original, S2, S3 and C6 have 28..30.
+  #if defined(CONFIG_IDF_TARGET_ESP32)   || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+    define_const(GPIO_NUM_28);
+    define_const(GPIO_NUM_29);
+    define_const(GPIO_NUM_30);
+  #endif
+    
+  // Original, S2 and S3 have 31..39.
+  #if defined(CONFIG_IDF_TARGET_ESP32)   || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3)
+    define_const(GPIO_NUM_31);    
+    define_const(GPIO_NUM_32);
+    define_const(GPIO_NUM_33);
+    define_const(GPIO_NUM_34);
+    define_const(GPIO_NUM_35);
+    define_const(GPIO_NUM_36);
+    define_const(GPIO_NUM_37);
+    define_const(GPIO_NUM_38);
+    define_const(GPIO_NUM_39);
+  #endif
 
-  define_const(GPIO_NUM_25);
-  define_const(GPIO_NUM_26);
-  define_const(GPIO_NUM_27);
+  // S2 and S3 have 40..46.
+  #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+    define_const(GPIO_NUM_40);    
+    define_const(GPIO_NUM_41);
+    define_const(GPIO_NUM_42);
+    define_const(GPIO_NUM_43);
+    define_const(GPIO_NUM_44);
+    define_const(GPIO_NUM_45);
+    define_const(GPIO_NUM_46);
+  #endif
 
-  define_const(GPIO_NUM_32);
-  define_const(GPIO_NUM_33);
-  define_const(GPIO_NUM_34);
-  define_const(GPIO_NUM_35);
-  define_const(GPIO_NUM_36);
-  define_const(GPIO_NUM_37);
-  define_const(GPIO_NUM_38);
-  define_const(GPIO_NUM_39);
-  define_const(GPIO_NUM_MAX);
+  // S3 alone has 47,48.
+  #if defined(CONFIG_IDF_TARGET_ESP32S3)
+    define_const(GPIO_NUM_47);
+    define_const(GPIO_NUM_48);
+  #endif
 
   define_const(ADC_CHANNEL_0);
   define_const(ADC_CHANNEL_1);
