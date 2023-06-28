@@ -152,6 +152,9 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
 
   // ESP32::GPIO
   gpio = mrb_define_module_under(mrb, esp32, "GPIO");
+  
+  // ESP32::Constants
+  constants = mrb_define_module_under(mrb, esp32, "Constants");
 
   // Ruby-style snake-case methods.
   mrb_define_module_function(mrb, gpio, "pin_mode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
@@ -167,16 +170,13 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
   
   // DAC available only on some chips.
   #ifdef SOC_DAC_SUPPORTED
-    mrb_define_const(mrb, esp32, "SOC_DAC_SUPPORTED", mrb_true_value());
+    mrb_define_const(mrb, constants, "SOC_DAC_SUPPORTED", mrb_true_value());
     mrb_define_module_function(mrb, gpio, "analogWrite", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
     mrb_define_module_function(mrb, gpio, "analog_write", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
   #else
-    mrb_define_const(mrb, esp32, "SOC_DAC_SUPPORTED", mrb_false_value());
+    mrb_define_const(mrb, constants, "SOC_DAC_SUPPORTED", mrb_false_value());
   #endif
   
-  // ESP32::Constants
-  constants = mrb_define_module_under(mrb, esp32, "Constants");
-
   // Pass a C constant through to mruby, defined inside ESP32::Constants.
   #define define_const(SYM) \
   do { \
