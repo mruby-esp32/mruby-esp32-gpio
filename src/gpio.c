@@ -84,7 +84,8 @@ mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
   };
   ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
   
-  // Configuration. ADC_BITWIDTH_DEFAULT = 12
+  // Always use maximum resolution and attenuation.
+  // Should make this configurable.
   adc_oneshot_chan_cfg_t config = {
       .bitwidth = ADC_BITWIDTH_DEFAULT,
       .atten = ADC_ATTEN_DB_11,
@@ -262,6 +263,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
     define_const(GPIO_NUM_48);
   #endif
 
+  // All chips define ADC_CHANNEL_0..ADC_CHANNEL_9
   define_const(ADC_CHANNEL_0);
   define_const(ADC_CHANNEL_1);
   define_const(ADC_CHANNEL_2);
@@ -270,7 +272,7 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
   define_const(ADC_CHANNEL_5);
   define_const(ADC_CHANNEL_6);
   define_const(ADC_CHANNEL_7);
-  // Channel 8 and 9 only exist on ADC2.
+  // Channel 8 and 9 only on ADC2 for original ESP32, may work on ADC1 for others. Not sure.
   define_const(ADC_CHANNEL_8);
   define_const(ADC_CHANNEL_9);
 
