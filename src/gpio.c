@@ -128,6 +128,14 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb)
   esp32 = mrb_define_module(mrb, "ESP32");
 
   gpio = mrb_define_module_under(mrb, esp32, "GPIO");
+  // Ruby-style snake case methods.
+  mrb_define_module_function(mrb, gpio, "pin_mode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, gpio, "digital_write", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, gpio, "digital_read", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));
+  mrb_define_module_function(mrb, gpio, "analog_write", mrb_esp32_gpio_analog_write, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, gpio, "analog_read", mrb_esp32_gpio_analog_read, MRB_ARGS_REQ(1));
+
+  // Arduino-style camel case methods.
   mrb_define_module_function(mrb, gpio, "pinMode", mrb_esp32_gpio_pin_mode, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalWrite", mrb_esp32_gpio_digital_write, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, gpio, "digitalRead", mrb_esp32_gpio_digital_read, MRB_ARGS_REQ(1));

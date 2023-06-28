@@ -8,14 +8,6 @@ module ESP32
     OUTPUT         = ESP32::GPIO_MODE_OUTPUT
     INPUT_OUTPUT   = ESP32::GPIO_MODE_INPUT_OUTPUT
     
-    class << self
-      alias :digital_write :digitalWrite   
-      alias :digital_read  :digitalRead
-      alias :analog_write  :analogWrite   
-      alias :analog_read   :analogRead    
-      alias :pin_mode      :pinMode 
-    end  
-  
     class Pin
       PIN_MODE = {
         pullup:   ESP32::GPIO_MODE_INPUT_PULLUP,
