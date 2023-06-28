@@ -1,6 +1,12 @@
 module ESP32
+  include Constants
+  
   module GPIO
-    include Constants
+    INPUT_PULLUP   = ESP32::GPIO_MODE_INPUT_PULLUP
+    INPUT_PULLDOWN = ESP32::GPIO_MODE_INPUT_PULLDOWN
+    INPUT          = ESP32::GPIO_MODE_INPUT
+    OUTPUT         = ESP32::GPIO_MODE_OUTPUT
+    INPUT_OUTPUT   = ESP32::GPIO_MODE_INPUT_OUTPUT
     
     class << self
       alias :digital_write :digitalWrite   
@@ -12,11 +18,11 @@ module ESP32
   
     class Pin
       PIN_MODE = {
-        pullup:   ESP32::GPIO::INPUT_PULLUP,
-        pulldown: ESP32::GPIO::INPUT_PULLDOWN,
-        input:    ESP32::GPIO::INPUT,
-        output:   ESP32::GPIO::OUTPUT,
-        inout:    ESP32::GPIO::INPUT_OUTPUT
+        pullup:   ESP32::GPIO_MODE_INPUT_PULLUP,
+        pulldown: ESP32::GPIO_MODE_INPUT_PULLDOWN,
+        input:    ESP32::GPIO_MODE_INPUT,
+        output:   ESP32::GPIO_MODE_OUTPUT,
+        inout:    ESP32::GPIO_MODE_INPUT_OUTPUT
       }
 
       attr_reader :pin

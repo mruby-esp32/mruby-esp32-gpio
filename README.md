@@ -21,6 +21,7 @@ In `CMakeLists.txt`, make sure the line `PRIV_REQUIRES` includes the `driver` co
 
 ## Example
 ```ruby
+include ESP32::Constants
 include ESP32::GPIO
 
 led = GPIO_NUM_4
