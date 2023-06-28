@@ -5,14 +5,22 @@
 #include "driver/dac_oneshot.h"
 #include "esp_adc/adc_oneshot.h"
 
-#define GPIO_MODE_DEF_PULLUP (BIT3)
-#define GPIO_MODE_DEF_PULLDOWN (BIT3)
-#define GPIO_MODE_INPUT_PULLUP ((GPIO_MODE_INPUT)|(GPIO_MODE_DEF_PULLUP))
-#define GPIO_MODE_INPUT_PULLDOWN ((GPIO_MODE_INPUT)|(GPIO_MODE_DEF_PULLDOWN))
-#define GPIO_MODE_OUTPUT (GPIO_MODE_DEF_OUTPUT) 
-#define GPIO_MODE_OUTPUT_OD ((GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
-#define GPIO_MODE_INPUT_OUTPUT_OD ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
-#define GPIO_MODE_INPUT_OUTPUT ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_OUTPUT))
+// Defined by ESP-IDF:
+// GPIO_MODE_DEF_INPUT  (BIT0)
+// GPIO_MODE_DEF_OUTPUT (BIT1)
+// GPIO_MODE_DEF_OD     (BIT2)
+#define GPIO_MODE_DEF_PULLUP    (BIT3)
+#define GPIO_MODE_DEF_PULLDOWN  (BIT4)
+
+// Defined by ESP-IDF:
+// GPIO_MODE_INPUT
+// GPIO_MODE_OUTPUT
+#define GPIO_MODE_INPUT_PULLUP           ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_PULLUP))
+#define GPIO_MODE_INPUT_PULLDOWN         ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_PULLDOWN))
+#define GPIO_MODE_INPUT_PULLUP_PULLDOWN  ((GPIO_MODE_DEF_INPUT)|(GPIO_MODE_DEF_PULLUP)|(GPIO_MODE_DEF_PULLDOWN))
+#define GPIO_MODE_INPUT_OUTPUT           ((GPIO_MODE_DEF_INPUT) |(GPIO_MODE_DEF_OUTPUT))
+#define GPIO_MODE_INPUT_OUTPUT_OD        ((GPIO_MODE_DEF_INPUT) |(GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
+#define GPIO_MODE_OUTPUT_OD              ((GPIO_MODE_DEF_OUTPUT)|(GPIO_MODE_DEF_OD))
 
 // Pin Mode
 static mrb_value
@@ -26,10 +34,17 @@ mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
   }
 
   esp_rom_gpio_pad_select_gpio(mrb_fixnum(pin));
-  gpio_set_direction(mrb_fixnum(pin), mrb_fixnum(dir) & ~GPIO_MODE_DEF_PULLUP);
+  
+  // Clear pullup and pulldown bits (BIT3 and BIT4) when setting direction.
+  gpio_set_direction(mrb_fixnum(pin), mrb_fixnum(dir) & ~(GPIO_MODE_DEF_PULLUP | GPIO_MODE_DEF_PULLDOWN));
 
-  if (mrb_fixnum(dir) & GPIO_MODE_DEF_PULLUP) {
-    gpio_set_pull_mode(mrb_fixnum(pin), GPIO_PULLUP_ONLY);
+  // Set correct pull mode based on bits 3 and 4.
+  uint32_t pull = mrb_fixnum(dir) >> 3;
+  switch(pull) {
+    case 0: gpio_set_pull_mode(mrb_fixnum(pin), GPIO_FLOATING);        break;
+    case 1: gpio_set_pull_mode(mrb_fixnum(pin), GPIO_PULLUP_ONLY);     break;
+    case 2: gpio_set_pull_mode(mrb_fixnum(pin), GPIO_PULLDOWN_ONLY);   break;
+    case 3: gpio_set_pull_mode(mrb_fixnum(pin), GPIO_PULLUP_PULLDOWN); break;
   }
 
   return self;
@@ -288,11 +303,14 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
   mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
   mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
 
-  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT",          mrb_fixnum_value(GPIO_MODE_INPUT));
-  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_OUTPUT",   mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT));
-  mrb_define_const(mrb, constants, "GPIO_MODE_OUTPUT",         mrb_fixnum_value(GPIO_MODE_OUTPUT));
-  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLUP",   mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
-  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT",                 mrb_fixnum_value(GPIO_MODE_INPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_OUTPUT",                mrb_fixnum_value(GPIO_MODE_OUTPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLUP",          mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLDOWN",        mrb_fixnum_value(GPIO_MODE_INPUT_PULLDOWN));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_PULLUP_PULLDOWN", mrb_fixnum_value(GPIO_MODE_INPUT_PULLUP_PULLDOWN));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_OUTPUT",          mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT));
+  mrb_define_const(mrb, constants, "GPIO_MODE_INPUT_OUTPUT_OD",       mrb_fixnum_value(GPIO_MODE_INPUT_OUTPUT_OD));
+  mrb_define_const(mrb, constants, "GPIO_MODE_OUTPUT_OD",             mrb_fixnum_value(GPIO_MODE_OUTPUT_OD));
 }
 
 void
