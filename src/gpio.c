@@ -278,20 +278,34 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
     define_const(GPIO_NUM_48);
   #endif
 
-  // All chips define ADC_CHANNEL_0..ADC_CHANNEL_9
+  //
+  // All chips have ADC_CHANNEL_0..ADC_CHANNEL_9 defined, but limit them instead
+  // to the channels which are actually connected to GPIOs.
+  //
+  // All chips connect ADC_CHANNEL_0..ADC_CHANNEL_4 to a GPIO.
   define_const(ADC_CHANNEL_0);
   define_const(ADC_CHANNEL_1);
   define_const(ADC_CHANNEL_2);
   define_const(ADC_CHANNEL_3);
   define_const(ADC_CHANNEL_4);
-  define_const(ADC_CHANNEL_5);
-  define_const(ADC_CHANNEL_6);
-  define_const(ADC_CHANNEL_7);
-  // Channel 8 and 9 only on ADC2 for original ESP32, may work on ADC1 for others. Not sure.
-  define_const(ADC_CHANNEL_8);
-  define_const(ADC_CHANNEL_9);
 
-  // DAC available only on some chips.
+  // Original, S2, S3 and C6 have 5,6.
+  #if defined(CONFIG_IDF_TARGET_ESP32)   || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+    define_const(ADC_CHANNEL_5);
+    define_const(ADC_CHANNEL_6);
+  #endif
+
+  // Original, S2 and S3 have 7,8,9.
+  // Note: Original ESP32 has 8,9 only on ADC2 which isn't implemented yet.
+  #if defined(CONFIG_IDF_TARGET_ESP32)   || defined(CONFIG_IDF_TARGET_ESP32S2) || \
+      defined(CONFIG_IDF_TARGET_ESP32S3)
+    define_const(ADC_CHANNEL_7);
+    define_const(ADC_CHANNEL_8);
+    define_const(ADC_CHANNEL_9);
+  #endif
+
+  // Original and S2 have DACs.
   #ifdef SOC_DAC_SUPPORTED
     define_const(DAC_CHAN_0);
     define_const(DAC_CHAN_1);
