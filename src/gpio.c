@@ -27,7 +27,7 @@ static mrb_value
 mrb_esp32_gpio_pin_mode(mrb_state *mrb, mrb_value self) {
   mrb_value pin, dir;
 
-  mrb_get_args(mrb, "ii", &pin, &dir);
+  mrb_get_args(mrb, "oo", &pin, &dir);
 
   if (!mrb_fixnum_p(pin) || !mrb_fixnum_p(dir)) {
     return mrb_nil_value();
@@ -55,7 +55,7 @@ static mrb_value
 mrb_esp32_gpio_digital_read(mrb_state *mrb, mrb_value self) {
   mrb_value pin;
 
-  mrb_get_args(mrb, "i", &pin);
+  mrb_get_args(mrb, "o", &pin);
 
   if (!mrb_fixnum_p(pin)) {
     return mrb_nil_value();
@@ -69,7 +69,7 @@ static mrb_value
 mrb_esp32_gpio_digital_write(mrb_state *mrb, mrb_value self) {
   mrb_value pin, level;
 
-  mrb_get_args(mrb, "ii", &pin, &level);
+  mrb_get_args(mrb, "oo", &pin, &level);
 
   if (!mrb_fixnum_p(pin) || !mrb_fixnum_p(level)) {
     return mrb_nil_value();
@@ -85,7 +85,7 @@ static mrb_value
 mrb_esp32_gpio_analog_read(mrb_state *mrb, mrb_value self) {
   mrb_value ch;
 
-  mrb_get_args(mrb, "i", &ch);
+  mrb_get_args(mrb, "o", &ch);
 
   if (!mrb_fixnum_p(ch)) {
     return mrb_nil_value();
@@ -121,7 +121,7 @@ static mrb_value
 mrb_esp32_gpio_analog_write(mrb_state *mrb, mrb_value self) {
   mrb_value ch, vol;
 
-  mrb_get_args(mrb, "ii", &ch, &vol);
+  mrb_get_args(mrb, "oo", &ch, &vol);
 
   if (!mrb_fixnum_p(ch) || !mrb_fixnum_p(vol)) {
     return mrb_nil_value();
