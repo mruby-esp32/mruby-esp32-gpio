@@ -1,22 +1,26 @@
 module ESP32
-  module GPIO
-    include Constants
-    
-    class << self
-      alias :digital_write :digitalWrite   
-      alias :digital_read  :digitalRead
-      alias :analog_write  :analogWrite   
-      alias :analog_read   :analogRead    
-      alias :pin_mode      :pinMode 
-    end  
+  include Constants
   
+  module GPIO
+    INPUT                 = ESP32::GPIO_MODE_INPUT
+    OUTPUT                = ESP32::GPIO_MODE_OUTPUT
+    INPUT_PULLUP          = ESP32::GPIO_MODE_INPUT_PULLUP
+    INPUT_PULLDOWN        = ESP32::GPIO_MODE_INPUT_PULLDOWN
+    INPUT_PULLUP_PULLDOWN = ESP32::GPIO_MODE_INPUT_PULLUP_PULLDOWN
+    INPUT_OUTPUT          = ESP32::GPIO_MODE_INPUT_OUTPUT
+    INPUT_OUTPUT_OD       = ESP32::GPIO_MODE_INPUT_OUTPUT_OD
+    OUTPUT_OD             = ESP32::GPIO_MODE_OUTPUT_OD
+
     class Pin
       PIN_MODE = {
-        pullup:   ESP32::GPIO::INPUT_PULLUP,
-        pulldown: ESP32::GPIO::INPUT_PULLDOWN,
-        input:    ESP32::GPIO::INPUT,
-        output:   ESP32::GPIO::OUTPUT,
-        inout:    ESP32::GPIO::INPUT_OUTPUT
+        input:                  ESP32::GPIO_MODE_INPUT,
+        output:                 ESP32::GPIO_MODE_OUTPUT,
+        input_pullup:           ESP32::GPIO_MODE_INPUT_PULLUP,
+        input_pulldown:         ESP32::GPIO_MODE_INPUT_PULLDOWN,
+        input_pullup_pulldown:  ESP32::GPIO_MODE_INPUT_PULLUP_PULLDOWN,
+        input_output:           ESP32::GPIO_MODE_INPUT_OUTPUT,
+        input_output_od:        ESP32::GPIO_MODE_INPUT_OUTPUT_OD,
+        output_od:              ESP32::GPIO_MODE_OUTPUT_OD,
       }
 
       attr_reader :pin
