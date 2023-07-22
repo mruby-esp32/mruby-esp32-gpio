@@ -2,6 +2,9 @@ module ESP32
   include Constants
   
   module GPIO
+    HIGH = ESP32::GPIO_HIGH
+    LOW  = ESP32::GPIO_LOW
+    
     INPUT                 = ESP32::GPIO_MODE_INPUT
     OUTPUT                = ESP32::GPIO_MODE_OUTPUT
     INPUT_PULLUP          = ESP32::GPIO_MODE_INPUT_PULLUP
@@ -12,6 +15,9 @@ module ESP32
     OUTPUT_OD             = ESP32::GPIO_MODE_OUTPUT_OD
 
     class Pin
+      HIGH = ESP32::GPIO_HIGH
+      LOW  = ESP32::GPIO_LOW
+      
       PIN_MODE = {
         input:                  ESP32::GPIO_MODE_INPUT,
         output:                 ESP32::GPIO_MODE_OUTPUT,

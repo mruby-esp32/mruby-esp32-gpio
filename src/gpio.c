@@ -314,8 +314,8 @@ mrb_mruby_esp32_gpio_gem_init(mrb_state* mrb) {
     define_const(DAC_CHANNEL_2);
   #endif
 
-  mrb_define_const(mrb, constants, "LOW", mrb_fixnum_value(0));
-  mrb_define_const(mrb, constants, "HIGH", mrb_fixnum_value(1));
+  mrb_define_const(mrb, constants, "GPIO_LOW", mrb_fixnum_value(0));
+  mrb_define_const(mrb, constants, "GPIO_HIGH", mrb_fixnum_value(1));
 
   define_const(GPIO_MODE_INPUT);
   define_const(GPIO_MODE_OUTPUT);
